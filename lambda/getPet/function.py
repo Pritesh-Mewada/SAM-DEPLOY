@@ -1,2 +1,4 @@
 def handler(event, context):
-    return event
+    data["Event"] = event;
+    data["Env"] = process.env.NODE_ENV;
+    return data

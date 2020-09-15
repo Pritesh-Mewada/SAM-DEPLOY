@@ -43,7 +43,8 @@ paths:
         type: "aws"
         httpMethod: "POST"
         # Replace AWS_REGION and ACCOUNT_ID in uri
-        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:AWS_REGION:ACCOUNT_ID:function:PostPetFunction/invocations"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostPetFunction.Arn}/invocations"
         responses:
           default:
             statusCode: 200
@@ -86,7 +87,8 @@ paths:
         type: "aws"
         httpMethod: "POST"
         # Replace AWS_REGION and ACCOUNT_ID in uri
-        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:AWS_REGION:ACCOUNT_ID:function:GetPetFunction/invocations"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPetFunction.Arn}/invocations"
         responses:
           default:
             statusCode: 200
@@ -102,7 +104,7 @@ definitions:
       name:
         type: "string"
       type:
-        type: "string"  
+        type: "string"
       sub-type:
         type: "string"
       photoUrl:

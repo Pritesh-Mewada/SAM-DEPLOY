@@ -2,16 +2,46 @@ AWSTemplateFormatVersion : "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Pet Store Rest API Service
 
+Parameters:
+  S3BucketName:
+    Type: String
+    Description: The name of the S3 bucket in which the Swagger specification is stored
+  StageName:
+    Type: String
+    Description: The name of the stage, e.g. "dev", "preprod", "prod"
+    Default: dev
+Globals:
+  Function:
+    Runtime: python3.6
+    Timeout: 180
+    Environment:
+      Variables:
+        NODE_ENV:
+          Ref: StageName
+
 Resources:
-  PetStoreApiGateway: 
+  PetStoreApiGateway:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Prod
-      DefinitionUri: ./swagger.yaml
+      Name:
+        Fn::Sub: pet-store-app-api-${StageName}
+      StageName:
+        Ref: StageName
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location:
+              Fn::Join:
+                - ''
+                - - 's3://'
+                  - Ref: S3BucketName
+                  - '/swagger.yaml'
   PostPetFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: PostPetFunction
+      FunctionName:
+        Fn::Sub: PostPetFunction-${StageName}
       Runtime: python3.6
       Handler: function.handler
       CodeUri: ./lambda/postPet/
@@ -19,7 +49,8 @@ Resources:
         PostPetApi:
           Type: Api
           Properties:
-            RestApiId: !Ref "PetStoreApiGateway"
+            RestApiId:
+              Ref: "PetStoreApiGateway"
             Path: /pet
             Method: POST
       Policies:
@@ -27,7 +58,8 @@ Resources:
   GetPetFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: GetPetFunction
+      FunctionName:
+        Fn::Sub: GetPetFunction-${StageName}
       Runtime: python3.6
       Handler: function.handler
       CodeUri: ./lambda/getPet/
@@ -35,7 +67,8 @@ Resources:
         GetPetApi:
           Type: Api
           Properties:
-            RestApiId: !Ref "PetStoreApiGateway"
+            RestApiId:
+              Ref: "PetStoreApiGateway"
             Path: /pet/{petId}
             Method: GET
       Policies:
